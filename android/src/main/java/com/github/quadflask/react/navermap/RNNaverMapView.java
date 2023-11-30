@@ -2,7 +2,6 @@ package com.github.quadflask.react.navermap;
 
 import android.graphics.PointF;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -28,23 +27,20 @@ import java.util.List;
 
 public class RNNaverMapView extends MapView
         implements OnMapReadyCallback, NaverMap.OnCameraIdleListener, NaverMap.OnMapClickListener, RNNaverMapViewProps {
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
     private ThemedReactContext themedReactContext;
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
-    private NaverMapSdk naverMapSdk;
     private ViewAttacherGroup attacherGroup;
     private long lastTouch = 0;
     private final List<RNNaverMapFeature<?>> features = new ArrayList<>();
 
     public RNNaverMapView(@NonNull ThemedReactContext themedReactContext, ReactApplicationContext appContext,
+            FusedLocationSource locationSource,
             NaverMapOptions naverMapOptions, Bundle instanceStateBundle) {
         super(ReactUtil.getNonBuggyContext(themedReactContext, appContext), naverMapOptions);
         this.themedReactContext = themedReactContext;
-        this.locationSource = new FusedLocationSource(appContext.getCurrentActivity(),
-                LOCATION_PERMISSION_REQUEST_CODE);
+        this.locationSource = locationSource;
         super.onCreate(instanceStateBundle);
-        naverMapSdk = NaverMapSdk.getInstance(appContext);
         // super.onStart();
         getMapAsync(this);
 
