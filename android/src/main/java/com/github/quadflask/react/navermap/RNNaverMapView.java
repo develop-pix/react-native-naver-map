@@ -2,6 +2,7 @@ package com.github.quadflask.react.navermap;
 
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -25,24 +26,31 @@ import com.naver.maps.map.util.FusedLocationSource;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RNNaverMapView extends MapView implements OnMapReadyCallback, NaverMap.OnCameraIdleListener, NaverMap.OnMapClickListener, RNNaverMapViewProps {
+public class RNNaverMapView extends MapView
+        implements OnMapReadyCallback, NaverMap.OnCameraIdleListener, NaverMap.OnMapClickListener, RNNaverMapViewProps {
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
     private ThemedReactContext themedReactContext;
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
+    private NaverMapSdk naverMapSdk;
     private ViewAttacherGroup attacherGroup;
     private long lastTouch = 0;
     private final List<RNNaverMapFeature<?>> features = new ArrayList<>();
 
-    public RNNaverMapView(@NonNull ThemedReactContext themedReactContext, ReactApplicationContext appContext, FusedLocationSource locationSource, NaverMapOptions naverMapOptions, Bundle instanceStateBundle) {
+    public RNNaverMapView(@NonNull ThemedReactContext themedReactContext, ReactApplicationContext appContext,
+            NaverMapOptions naverMapOptions, Bundle instanceStateBundle) {
         super(ReactUtil.getNonBuggyContext(themedReactContext, appContext), naverMapOptions);
         this.themedReactContext = themedReactContext;
-        this.locationSource = locationSource;
+        this.locationSource = new FusedLocationSource(appContext.getCurrentActivity(),
+                LOCATION_PERMISSION_REQUEST_CODE);
         super.onCreate(instanceStateBundle);
-//        super.onStart();
+        naverMapSdk = NaverMapSdk.getInstance(appContext);
+        // super.onStart();
         getMapAsync(this);
 
         // Set up a parent view for triggering visibility in subviews that depend on it.
-        // Mainly ReactImageView depends on Fresco which depends on onVisibilityChanged() event
+        // Mainly ReactImageView depends on Fresco which depends on
+        // onVisibilityChanged() event
         attacherGroup = new ViewAttacherGroup(this.themedReactContext);
         LayoutParams attacherLayoutParams = new LayoutParams(0, 0);
         attacherLayoutParams.width = 0;
@@ -68,6 +76,7 @@ public class RNNaverMapView extends MapView implements OnMapReadyCallback, Naver
                 lastTouch = System.currentTimeMillis();
             }
         });
+        naverMapSdk.flushCache(() -> Log.i("NaverMap", "Map Cache Clean"));
         onInitialized();
     }
 
@@ -87,8 +96,9 @@ public class RNNaverMapView extends MapView implements OnMapReadyCallback, Naver
             double tiltValue = tilt == null ? cam.tilt : tilt;
             double bearingValue = bearing == null ? cam.bearing : bearing;
 
-            naverMap.moveCamera(CameraUpdate.toCameraPosition(new CameraPosition(latLng, zoomValue, tiltValue, bearingValue))
-                    .animate(CameraAnimation.Easing));
+            naverMap.moveCamera(
+                    CameraUpdate.toCameraPosition(new CameraPosition(latLng, zoomValue, tiltValue, bearingValue))
+                            .animate(CameraAnimation.Easing));
         });
     }
 
@@ -235,7 +245,8 @@ public class RNNaverMapView extends MapView implements OnMapReadyCallback, Naver
 
     @Override
     public void moveCameraFitBound(LatLngBounds bounds, int left, int top, int right, int bottom) {
-        getMapAsync(e -> naverMap.moveCamera(CameraUpdate.fitBounds(bounds, left, top, right, bottom).animate(CameraAnimation.Fly, 500)));
+        getMapAsync(e -> naverMap.moveCamera(
+                CameraUpdate.fitBounds(bounds, left, top, right, bottom).animate(CameraAnimation.Fly, 500)));
     }
 
     @Override
