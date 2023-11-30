@@ -39,7 +39,7 @@ public class RNNaverMapViewManager extends ViewGroupManager<RNNaverMapViewContai
     private static final int SET_LOCATION_TRACKING_MODE = 4;
     private static final int ANIMATE_TO_COORDINATES = 6;
     private static final int SET_LAYER_GROUP_ENABLED = 7;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
     private static final List<String> LAYER_GROUPS = Collections.unmodifiableList(Arrays.asList(
             NaverMap.LAYER_GROUP_BUILDING,
             NaverMap.LAYER_GROUP_TRANSIT,
